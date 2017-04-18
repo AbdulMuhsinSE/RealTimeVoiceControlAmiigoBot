@@ -1,0 +1,7 @@
+right
+left
+forward
+back
+wander
+faster
+slower
