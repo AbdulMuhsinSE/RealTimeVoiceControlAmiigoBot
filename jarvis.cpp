@@ -1,10 +1,10 @@
+#include "threadsafequeue.h"
 #include <iostream>
 #include <string>
 #include <pocketsphinx.h>
 #include <sphinxbase/ad.h>
 #include <sphinxbase/err.h>
-#include <thread>
-#include "threadsafequeue.h"
+
 
 using namespace std;
 
@@ -21,11 +21,6 @@ int32 k;                           // holds the number of frames in the audio bu
 int32 score = 80;					// holds the score associated with the hypothesis. This sets the threshold 
 char const *hyp;                   // pointer to "hypothesis"
 
-void *mic_read()
-{
-    ad_start_rec(ad);
-    ps_start_utt(ps);
-}
 
 
 int main(int argc, char *argv[])
@@ -47,7 +42,7 @@ int main(int argc, char *argv[])
   
   
   //command producer thread
-  std::thread producer(std::bind(&recognize_from_microphone, std::ref(q)));
+  std::thread producer(std::bind(recognize_from_microphone, std::ref(q)));
   
   //command consumer thread
   std::thread consumer(std::bind(&consume, std::ref(q)));
@@ -88,10 +83,9 @@ void recognize_from_microphone(ThreadSafeQueue<string>& q)
             ps_end_utt(ps);                          // then mark the end of the utterance
             ad_stop_rec(ad);                         // stop recording
             hyp = ps_get_hyp(ps, &score );             // query pocketsphinx for "hypothesis" of decoded statement
-            q.push(hyp);							 //push the hypothesis into the queue
+            string speech = hyp;
+            q.push(speech);							 //push the hypothesis into the queue
             
-            //return hyp;                              // the function returns the hypothesis
-            //break;                                   // exit the while loop and return to main
         }
     }
 }
