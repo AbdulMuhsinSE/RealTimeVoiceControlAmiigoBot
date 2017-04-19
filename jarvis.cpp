@@ -57,19 +57,18 @@ void consume(ThreadSafeQueue<string>& q)
 {
 	while(1)
 	{
-		string command = q.pop();
+		auto command = q.pop();
 		cout << "Decoded Command Sequence: "<< command << "\n" <<endl; 
 	} 
 }
 
 void recognize_from_microphone(ThreadSafeQueue<string>& q)
 {
-
-    ad_start_rec(ad);                                // start recording
-    ps_start_utt(ps);                                // mark the start of the utterance
-    utt_started = FALSE;                             // clear the utt_started flag
-
+	ad_start_rec(ad);                                // start recording
+	ps_start_utt(ps);                                // mark the start of the utterance
+	utt_started = FALSE;                             // clear the utt_started flag
     while(1) {
+		
         k = ad_read(ad, adbuf, 4096);                // capture the number of frames in the audio buffer
         ps_process_raw(ps, adbuf, k, FALSE, FALSE);  // send the audio buffer to the pocketsphinx decoder
 
@@ -85,7 +84,9 @@ void recognize_from_microphone(ThreadSafeQueue<string>& q)
             hyp = ps_get_hyp(ps, &score );             // query pocketsphinx for "hypothesis" of decoded statement
             string speech = hyp;
             q.push(speech);							 //push the hypothesis into the queue
-            
+            ad_start_rec(ad);                                // start recording
+			ps_start_utt(ps);                                // mark the start of the utterance
+			utt_started = FALSE;                             // clear the utt_started flag
         }
     }
 }
