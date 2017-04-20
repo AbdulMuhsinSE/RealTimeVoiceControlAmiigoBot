@@ -1,0 +1,8 @@
+FORWARD /1e-1/
+BACK /1e-1/
+RIGHT /1e-1/
+LEFT /1e-1/
+SLOWER /1e-1/
+FASTER /1e-1/
+WANDER /1e-1/
+JARVIS /1e-1/

@@ -1,5 +1,5 @@
 #ifndef THREADSAFEQUEUE_H
-#define THREADSAFEQUEUE_J
+#define THREADSAFEQUEUE_H
 
 #include <queue>
 #include <thread>
