@@ -24,11 +24,14 @@ ad_rec_t *ad;                      // create audio recording structure - for use
 int16 adbuf[4096];                 // buffer array to hold audio data
 uint8 utt_started, in_speech;      // flags for tracking active speech - has speech started? - is speech currently happening?
 int32 k;                           // holds the number of frames in the audio buffer
-int32 score = 80;					// holds the score associated with the hypothesis. This sets the threshold
-char const *hyp;                   // pointer to "hypothesis"
+int32 score;					// holds the score associated with the hypothesis. This sets the threshold
 std::mutex mutex_;
 ArRobot robot;
+bool global_running;
+
 const string rname = "JARVIS";
+char const *hyp;                   // pointer to "hypothesis"
+
 
 
 
@@ -96,7 +99,8 @@ int main(int argc, char *argv[])
 
 
 	ArTCM2 *compass = compassConnector.create(&robot);
-	if(compass && !compass->blockingConnect()) {
+	if(compass && !compass->blockingConnect())
+	{
 		compass = NULL;
 	}
 
@@ -119,6 +123,8 @@ int main(int argc, char *argv[])
 
 	using namespace std::placeholders;
 
+	system("canberra-gtk-play -f jarvissounds/jbl_begin.ogg");
+	global_running = true;
 
 	//command producer thread
 	std::thread producer(std::bind(&producecommand, std::ref(q)));
@@ -137,46 +143,106 @@ int main(int argc, char *argv[])
 
 void consume(ThreadSafeQueue<string>& q)
 {
-	while(1)
+	while(global_running)
 	{
 		auto command = q.pop();
+		cout << command << endl;
 		std::unique_lock<std::mutex> mlock(mutex_);
 		if(command.find("FORWARD") != std::string::npos)
 		{
-			cout << "Moving Forward....\n" << endl;
-			robot.setRotVel(0);
-			robot.setVel(-400);
-		}
-		if(command.find("BACK") != std::string::npos)
-		{
+			cout << "Moving Forward...." << endl;
 			robot.setRotVel(0);
 			robot.setVel(400);
 		}
-		if(command.find("RIGHT") != std::string::npos)
+		else if(command.find("BACK") != std::string::npos)
 		{
-			robot.setRotVel(20);
+			cout << "Backing Up...." << endl;
+			robot.setRotVel(0);
+			robot.setVel(-400);
 		}
-		if(command.find("LEFT") != std::string::npos)
+		else if(command.find("STOP") != std::string::npos)
 		{
-			robot.setRotVel(-20);
-		}
-		if(command.find("SLOWER") != std::string::npos)
-		{
+			cout << "Stopping...." << endl;
+			robot.setRotVel(0);
 			robot.setVel(0);
 		}
-		if(command.find("FASTER") != std::string::npos)
+
+		if(command.find("RIGHT") != std::string::npos)
 		{
-			robot.setVel(800);
+			cout << "Turning Right...." << endl;
+			robot.setRotVel(20);
+		}
+		else if(command.find("LEFT") != std::string::npos)
+		{
+			cout << "Turning Left...." << endl;
+			robot.setRotVel(-20);
+		}
+
+		if(command.find("SLOW DOWN") != std::string::npos)
+		{
+			cout << "Slowing Down...." << endl;
+			if(robot.getVel()<900 && robot.getVel() > 0)
+			{
+				robot.setVel((robot.getVel()-100));
+			}
+			else if(robot.getVel()>-900 && robot.getVel() < 0)
+			{
+				robot.setVel((robot.getVel()+100));
+			}
+			else
+			{
+				std::cout << "Already at full stop" << endl;
+			}
+		}
+		else if(command.find("FASTER") != std::string::npos)
+		{
+			cout << "Gotta Go Fast...." << endl;
+			if(robot.getVel()<900 && robot.getVel()>=0)
+			{
+				robot.setVel((robot.getVel()+100));
+			}
+			else if (robot.getVel()>-900 && robot.getVel()<0)
+			{
+				robot.setVel(robot.getVel()-100);
+			}
+			else
+			{
+				std::cout << "Too Fast" << endl;
+			}
+
 		}
 		if(command.find("WANDER") != std::string::npos)
 		{
+			robot.stop();
+			robot.clearDirectMotion();
+			cout<< "JARVIS is now in Wander mode" << endl;
+
+			ArActionStallRecover recover;
+			ArActionBumpers bumpers;
+			ArActionAvoidFront avoidFrontNear("Avoid Front Near", 225, 0);
+			ArActionAvoidFront avoidFrontFar;
+			ArActionConstantVelocity constantVelocity("Constant Velocity", 400);
+
+			robot.addAction(&recover, 100);
+			robot.addAction(&bumpers, 75);
+			robot.addAction(&avoidFrontNear, 50);
+			robot.addAction(&avoidFrontFar, 49);
+			robot.addAction(&constantVelocity, 25);
 
 		}
+		if(command.find("QUIT") != std::string::npos)
+		{
+			robot.stop();
+			global_running == false;
+			std::exit(0);
+		}
 		robot.enableMotors();
+		robot.enableSonar();
 		robot.comInt(ArCommands::ENABLE,1);
 		mlock.unlock();
 		usleep(200);
 	}
+
 }
 
 
@@ -185,7 +251,7 @@ void producecommand(ThreadSafeQueue<string>& q)
 	ad_start_rec(ad);                                // start recording
 	ps_start_utt(ps);                                // mark the start of the utterance
 	utt_started = FALSE;                             // clear the utt_started flag
-	while(1) {
+	while(global_running) {
 
 		k = ad_read(ad, adbuf, 4096);                // capture the number of frames in the audio buffer
 		ps_process_raw(ps, adbuf, k, FALSE, FALSE);  // send the audio buffer to the pocketsphinx decoder
@@ -200,12 +266,13 @@ void producecommand(ThreadSafeQueue<string>& q)
 			ps_end_utt(ps);                          // then mark the end of the utterance
 			ad_stop_rec(ad);                         // stop recording
 			hyp = ps_get_hyp(ps, &score );             // query pocketsphinx for "hypothesis" of decoded statement
+			//cout << "The hypothesis score is: " << score << endl;
 
 			string speech = hyp;
 			if(speech.compare(0,rname.length(),rname)== 0)
 			{
 				q.push(speech);							 //push the hypothesis into the queue
-				cout << "Command Recognized. Running....\n" << endl;
+				cout << "Command Recognized. Running...." << endl;
 			}
 			else
 			{
@@ -218,4 +285,5 @@ void producecommand(ThreadSafeQueue<string>& q)
 			utt_started = FALSE;                             // clear the utt_started flag
 		}
 	}
+	std::exit(0);
 }

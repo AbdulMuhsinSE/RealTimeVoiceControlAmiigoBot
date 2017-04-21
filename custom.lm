@@ -1,4 +1,4 @@
-Language model created by QuickLM on Wed Apr 19 17:32:49 EDT 2017
+Language model created by QuickLM on Fri Apr 21 08:28:41 EDT 2017
 Copyright (c) 1996-2010 Carnegie Mellon University and Alexander I. Rudnicky
 
 The model is in standard ARPA format, designed by Doug Paul while he was at MITRE.
@@ -7,41 +7,49 @@ The code that was used to produce this language model is available in Open Sourc
 Please visit http://www.speech.cs.cmu.edu/tools/ for more information
 
 The (fixed) discount mass is 0.5. The backoffs are computed using the ratio method.
-This model based on a corpus of 8 sentences and 10 words
+This model based on a corpus of 10 sentences and 13 words
 
 \data\
-ngram 1=10
-ngram 2=16
-ngram 3=8
+ngram 1=13
+ngram 2=21
+ngram 3=11
 
 \1-grams:
--0.7782 </s> -0.3010
--0.7782 <s> -0.2218
--1.6812 BACK -0.2218
--1.6812 FASTER -0.2218
--1.6812 FORWARD -0.2218
--1.6812 JARVIS -0.2218
--1.6812 LEFT -0.2218
--1.6812 RIGHT -0.2218
--1.6812 SLOWER -0.2218
--1.6812 WANDER -0.2218
+-0.7924 </s> -0.3010
+-0.7924 <s> -0.2246
+-1.7924 BACK -0.2246
+-1.7924 DOWN -0.2246
+-1.7924 FASTER -0.2246
+-1.7924 FORWARD -0.2246
+-1.7924 JARVIS -0.2246
+-1.7924 LEFT -0.2246
+-1.7924 QUIT -0.2246
+-1.7924 RIGHT -0.2246
+-1.7924 SLOW -0.2940
+-1.7924 STOP -0.2246
+-1.7924 WANDER -0.2246
 
 \2-grams:
--1.2041 <s> BACK 0.0000
--1.2041 <s> FASTER 0.0000
--1.2041 <s> FORWARD 0.0000
--1.2041 <s> JARVIS 0.0000
--1.2041 <s> LEFT 0.0000
--1.2041 <s> RIGHT 0.0000
--1.2041 <s> SLOWER 0.0000
--1.2041 <s> WANDER 0.0000
+-1.3010 <s> BACK 0.0000
+-1.3010 <s> FASTER 0.0000
+-1.3010 <s> FORWARD 0.0000
+-1.3010 <s> JARVIS 0.0000
+-1.3010 <s> LEFT 0.0000
+-1.3010 <s> QUIT 0.0000
+-1.3010 <s> RIGHT 0.0000
+-1.3010 <s> SLOW 0.0000
+-1.3010 <s> STOP 0.0000
+-1.3010 <s> WANDER 0.0000
 -0.3010 BACK </s> -0.3010
+-0.3010 DOWN </s> -0.3010
 -0.3010 FASTER </s> -0.3010
 -0.3010 FORWARD </s> -0.3010
 -0.3010 JARVIS </s> -0.3010
 -0.3010 LEFT </s> -0.3010
+-0.3010 QUIT </s> -0.3010
 -0.3010 RIGHT </s> -0.3010
--0.3010 SLOWER </s> -0.3010
+-0.3010 SLOW DOWN 0.0000
+-0.3010 STOP </s> -0.3010
 -0.3010 WANDER </s> -0.3010
 
 \3-grams:
@@ -50,8 +58,11 @@ ngram 3=8
 -0.3010 <s> FORWARD </s>
 -0.3010 <s> JARVIS </s>
 -0.3010 <s> LEFT </s>
+-0.3010 <s> QUIT </s>
 -0.3010 <s> RIGHT </s>
--0.3010 <s> SLOWER </s>
+-0.3010 <s> SLOW DOWN
+-0.3010 <s> STOP </s>
 -0.3010 <s> WANDER </s>
+-0.3010 SLOW DOWN </s>
 
 \end\
