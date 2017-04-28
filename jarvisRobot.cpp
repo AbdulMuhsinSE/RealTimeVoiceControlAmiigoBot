@@ -34,8 +34,6 @@ char const *hyp;                   // pointer to "hypothesis"
 
 
 
-
-
 int main(int argc, char *argv[])
 {
 
@@ -47,8 +45,8 @@ int main(int argc, char *argv[])
 
 
 
-	parser.loadDefaultArguments();
-	//parser.addDefaultArgument("-rh 10.0.126.20");
+	//parser.loadDefaultArguments();
+	parser.addDefaultArgument("-rh 10.0.126.15");
 
 
 	ArRobotConnector robotConnector(&parser, &robot);
@@ -152,13 +150,13 @@ void consume(ThreadSafeQueue<string>& q)
 		{
 			cout << "Moving Forward...." << endl;
 			robot.setRotVel(0);
-			robot.setVel(400);
+			robot.setVel(200);
 		}
 		else if(command.find("BACK") != std::string::npos)
 		{
 			cout << "Backing Up...." << endl;
 			robot.setRotVel(0);
-			robot.setVel(-400);
+			robot.setVel(-200);
 		}
 		else if(command.find("STOP") != std::string::npos)
 		{
@@ -170,12 +168,12 @@ void consume(ThreadSafeQueue<string>& q)
 		if(command.find("RIGHT") != std::string::npos)
 		{
 			cout << "Turning Right...." << endl;
-			robot.setRotVel(20);
+			robot.setRotVel(-20);
 		}
 		else if(command.find("LEFT") != std::string::npos)
 		{
 			cout << "Turning Left...." << endl;
-			robot.setRotVel(-20);
+			robot.setRotVel(20);
 		}
 
 		if(command.find("SLOW DOWN") != std::string::npos)
@@ -228,6 +226,7 @@ void consume(ThreadSafeQueue<string>& q)
 			robot.addAction(&avoidFrontNear, 50);
 			robot.addAction(&avoidFrontFar, 49);
 			robot.addAction(&constantVelocity, 25);
+			usleep(1000);
 
 		}
 		if(command.find("QUIT") != std::string::npos)
